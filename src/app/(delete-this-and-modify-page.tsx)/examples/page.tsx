@@ -25,6 +25,7 @@ import { HoverCardDemo } from '@/components/hover-card-demo';
 import { InputDemo } from '@/components/input-demo';
 import { InputOTPDemo } from '@/components/input-otp-demo';
 import { LabelDemo } from '@/components/label-demo';
+import { LayoutTextFlipDemo } from '@/components/layout-text-flip-demo';
 import { MenubarDemo } from '@/components/menubar-demo';
 import { NavigationMenuDemo } from '@/components/navigation-menu-demo';
 import { PaginationDemo } from '@/components/pagination-demo';
@@ -128,6 +129,9 @@ export default function SinkPage() {
             </ComponentWrapper>
             <ComponentWrapper name='label'>
                 <LabelDemo />
+            </ComponentWrapper>
+            <ComponentWrapper name='layout-text-flip'>
+                <LayoutTextFlipDemo />
             </ComponentWrapper>
             <ComponentWrapper name='menubar'>
                 <MenubarDemo />
