@@ -38,6 +38,14 @@
   --sidebar-ring: oklch(0.708 0 0);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+
+  /* Brand colors - Configurable per client */
+  --brand-primary: oklch(0.79 0.16 75);
+  --brand-primary-hover: oklch(0.72 0.16 75);
+  --brand-secondary: oklch(0.65 0.19 35);
+  --brand-secondary-hover: oklch(0.58 0.19 35);
+  --brand-accent: oklch(0.85 0.12 85);
+  --brand-foreground: oklch(0.98 0 0);
 }
 
 .dark {
