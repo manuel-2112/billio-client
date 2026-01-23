@@ -7,14 +7,15 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAccountQuery } from '@/hooks/api/queries/use-account-query';
 import { useTipMutation } from '@/hooks/api/mutations';
 import { TipSelectorView } from './tip-selector-view';
-import { Button } from '@/registry/new-york-v4/ui/button';
+import { FloatingPaymentPanel } from '@/components/payment/checkout/floating-payment-panel';
+import { CustomButton } from '@/components/design-system/ui/custom-button';
 import { calculateTipFromPercentage } from '@/lib/utils/validation';
 import { TIP_PRESETS } from '@/lib/constants/payment';
-import { toast } from 'sonner';
+import { toast } from '@/components/design-system/feedback/toast';
 
 interface TipSelectorContainerProps {
   /**
@@ -37,10 +38,7 @@ interface TipSelectorContainerProps {
    * Callback when tip is confirmed
    */
   onConfirm?: () => void;
-  /**
-   * Callback to go back
-   */
-  onBack?: () => void;
+  overrideSubtotal?: number;
 }
 
 /**
@@ -67,9 +65,9 @@ export function TipSelectorContainer({
   table,
   accountId,
   onConfirm,
-  onBack,
+  overrideSubtotal,
 }: TipSelectorContainerProps) {
-  const { data: account } = useAccountQuery({
+  const { data } = useAccountQuery({
     restaurant,
     location,
     table,
@@ -80,28 +78,54 @@ export function TipSelectorContainer({
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
 
-  // Initialize selected preset based on current tip
+  const initialized = useRef(false);
+
+  // Initialize selected preset based on current tip or default to 10%
   useEffect(() => {
-    if (account && account.tip > 0 && account.subtotal > 0) {
-      const currentPercentage = Math.round(
-        (account.tip / account.subtotal) * 100
-      );
-      const matchingPreset = TIP_PRESETS.find(
-        (p) => Math.abs(p - currentPercentage) < 1
-      );
-      if (matchingPreset !== undefined) {
-        setSelectedPreset(matchingPreset);
+    // Check if we have data to work with
+    const subtotal = overrideSubtotal ?? (data?.account?.subtotal || 0);
+    
+    // Only proceed if we have valid data and haven't initialized yet
+    if (subtotal > 0 && data?.account) {
+      // If initialized, just sync UI with backend data (if changed externally or confirming selection)
+      // But don't FORCE default logic.
+      
+      if (data.account.tip > 0) {
+        // If there is a tip, sync UI
+        const currentPercentage = Math.round(
+          (data.account.tip / subtotal) * 100
+        );
+        const matchingPreset = TIP_PRESETS.find(
+          (p) => Math.abs(p - currentPercentage) < 1
+        );
+        if (matchingPreset !== undefined) {
+          setSelectedPreset(matchingPreset);
+        }
+        initialized.current = true;
+      } else if (!initialized.current) {
+        // Only if NOT initialized and tip is 0, we apply default.
+        // Once initialized, if tip is 0, it means user selected 0 (or we just set it to 0).
+        
+        const defaultPercentage = 10;
+        setSelectedPreset(defaultPercentage);
+        
+        // Apply default tip mutation
+        updateTip({ tip_percentage: defaultPercentage });
+        
+        initialized.current = true;
       }
+      // If initialized.current is true and tip is 0, do nothing (user likely selected 0).
     }
-  }, [account]);
+  }, [data, overrideSubtotal, updateTip]);
 
   const handlePresetSelect = (percentage: number) => {
-    if (!account) return;
+    if (!data?.account) return;
+    const { account } = data;
 
     setSelectedPreset(percentage);
     setCustomAmount('');
 
-    const tipAmount = calculateTipFromPercentage(account.subtotal, percentage);
+    const tipAmount = calculateTipFromPercentage(subtotalToUse, percentage);
 
     updateTip(
       { tip_percentage: percentage },
@@ -126,7 +150,7 @@ export function TipSelectorContainer({
 
     // Parse and validate amount
     const amount = parseInt(value.replace(/\D/g, ''), 10);
-    if (!isNaN(amount) && amount >= 0 && account) {
+    if (!isNaN(amount) && amount >= 0 && data?.account) {
       updateTip(
         { tip_amount: amount },
         {
@@ -139,28 +163,42 @@ export function TipSelectorContainer({
           },
         }
       );
-    } else if (value === '' && account) {
+    } else if (value === '' && data?.account) {
       // Reset to 0 if empty
       updateTip({ tip_amount: 0 });
     }
   };
 
-  if (!account) {
+  if (!data?.account) {
     return null;
   }
 
-  const currentTip = account.tip;
+  const { account } = data;
+
+  const subtotalToUse = overrideSubtotal ?? account.subtotal;
+  const currentTip = account.tip; // Tip is usually 0 initially or from backend.
+  // If we override subtotal, we probably want to calculate tip based on that.
+  
+  // Note: account.subtotal is the FULL bill.
+  // If we are splitting, we are paying a smaller amount. 
+  // We need to ensure we don't accidentally display the full bill total in FloatingPaymentPanel if we want to show just the split.
+  // The FloatingPaymentPanel below uses 'account.total + currentTip'.
+  // account.total includes tax. 
+  // If we override subtotal, we should probably approximate the tax part for display or just use the subtotal as the base.
+  // Simple approximation: Total = Subtotal * (1 + TaxRate/Subtotal)
+  // Let's rely on passed overrideSubtotal being the amount to PAY (including tax maybe? No, 'subtotal' usually implies before tax).
+  
+  // Actually, for split bill 'Item Selector', the total returned is usually inclusive of tax (price * quantity).
+  // Let's assume overrideSubtotal is actually the AMOUNT TO PAY (so effectively total).
+  // But Tip is calculated on subtotal (usually).
+  // If the user uses 'Smart Split', maybe they want to tip on their share.
 
   return (
     <div className="space-y-4">
-      {onBack && (
-        <Button variant="ghost" onClick={onBack} className="mb-2">
-          ← Volver
-        </Button>
-      )}
+
 
       <TipSelectorView
-        subtotal={account.subtotal}
+        subtotal={subtotalToUse}
         currentTip={currentTip}
         selectedPreset={selectedPreset}
         customAmount={customAmount}
@@ -169,16 +207,17 @@ export function TipSelectorContainer({
         disabled={isPending}
       />
 
-      {onConfirm && (
-        <Button
-          onClick={onConfirm}
-          className="w-full"
-          size="lg"
-          disabled={isPending}
-        >
-          {isPending ? 'Actualizando...' : 'Continuar al pago'}
-        </Button>
-      )}
+      <FloatingPaymentPanel
+        selectedCount={1} // Represents the bill/order
+        subtotal={subtotalToUse}
+        tax={overrideSubtotal ? 0 : account.tax} // Hide tax if override for simplicty, or calculate if needed
+        total={subtotalToUse + currentTip + (overrideSubtotal ? 0 : account.tax)} // If subtotalToUse replaces account.subtotal, we need to handle tax.
+        // If overrideSubtotal is passed, let's assume it INCLUDES everything except tip for now, or just handle it simply.
+        // Usually split amount = (items * price) + tax.
+        // So subtotalToUse might be 'Selected Total'.
+        onPayNow={onConfirm}
+        label="Continuar"
+      />
     </div>
   );
 }

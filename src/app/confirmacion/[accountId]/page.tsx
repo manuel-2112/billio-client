@@ -7,15 +7,15 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import { MobileContainer } from '@/components/design-system/layout';
 
 interface ConfirmationPageProps {
-  params: {
+  params: Promise<{
     accountId: string;
-  };
+  }>;
 }
 
 /**
@@ -29,6 +29,7 @@ interface ConfirmationPageProps {
  */
 export default function ConfirmationPage({ params }: ConfirmationPageProps) {
   const router = useRouter();
+  const { accountId } = use(params);
 
   useEffect(() => {
     // Prevent back navigation to payment page
@@ -43,7 +44,7 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
   }, [router]);
 
   // Extract last 8 characters of account ID for display
-  const orderNumber = params.accountId.slice(-8).toUpperCase();
+  const orderNumber = accountId.slice(-8).toUpperCase();
 
   return (
     <MobileContainer>

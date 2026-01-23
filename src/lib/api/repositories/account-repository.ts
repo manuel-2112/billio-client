@@ -25,7 +25,7 @@ export class AccountRepository {
     restaurant: string;
     location: string;
     table: number;
-  }): Promise<Account> {
+  }): Promise<import("@/types/api").GetAccountResponse> {
     return apiClient.get<GetAccountResponse>(
       `/${params.restaurant}/${params.location}/${params.table}`
     );

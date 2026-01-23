@@ -7,10 +7,12 @@
 
 import type { Account, CheckoutResponse } from './payment';
 
+import type { PublicAccountResponse } from './api-response';
+
 /**
  * Get account response
  */
-export type GetAccountResponse = Account;
+export type GetAccountResponse = PublicAccountResponse;
 
 /**
  * Update tip response

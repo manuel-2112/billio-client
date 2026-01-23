@@ -5,6 +5,9 @@
  * Follows Single Responsibility Principle: only renders header UI.
  */
 
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 
 interface PageHeaderProps {
@@ -17,7 +20,15 @@ interface PageHeaderProps {
    */
   subtitle?: string;
   /**
-   * Optional action button
+   * Optional back link URL
+   */
+  backHref?: string;
+  /**
+   * Optional back handler function (overrides backHref if provided)
+   */
+  onBack?: () => void;
+  /**
+   * Optional action button (right side)
    */
   action?: ReactNode;
   /**
@@ -29,33 +40,70 @@ interface PageHeaderProps {
 /**
  * PageHeader component
  * 
- * Provides consistent header styling across pages.
+ * Reusable header with sticky positioning, backdrop blur, and navigation.
  * 
  * @example
  * ```tsx
  * <PageHeader
- *   title="Mesa 5"
- *   subtitle="Revisa tu cuenta"
+ *   title="Split the Bill"
+ *   subtitle="Table 1"
+ *   backHref="/"
  * />
  * ```
  */
 export function PageHeader({
   title,
   subtitle,
+  backHref,
+  onBack,
   action,
   className,
 }: PageHeaderProps) {
   return (
     <header
-      className={`border-b bg-card px-4 py-4 ${className || ''}`}
+      className={cn(
+        'sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80',
+        className
+      )}
     >
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold">{title}</h1>
+      <div className="mx-auto flex max-w-lg items-center gap-4 px-4 py-4">
+        {/* Back Button */}
+        {(onBack || backHref) && (
+          <div className="-ml-2">
+            {onBack ? (
+              <button
+                onClick={onBack}
+                type="button"
+                className="flex items-center justify-center rounded-full p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="size-5 text-zinc-600 dark:text-zinc-400" />
+              </button>
+            ) : (
+              <Link
+                href={backHref!}
+                className="flex items-center justify-center rounded-full p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="size-5 text-zinc-600 dark:text-zinc-400" />
+              </Link>
+            )}
+          </div>
+        )}
+
+        {/* Title & Subtitle */}
+        <div className="flex-1">
+          <h1 className="text-lg font-semibold text-zinc-900 dark:text-white">
+            {title}
+          </h1>
           {subtitle && (
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              {subtitle}
+            </p>
           )}
         </div>
+
+        {/* Action Button */}
         {action && <div>{action}</div>}
       </div>
     </header>

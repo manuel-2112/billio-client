@@ -5,7 +5,7 @@
  * Follows Single Responsibility Principle: only renders button UI.
  */
 
-import { Button } from '@/registry/new-york-v4/ui/button';
+import { CustomButton } from '@/components/design-system/ui/custom-button';
 import { cn } from '@/lib/utils';
 
 interface TipPresetButtonProps {
@@ -50,18 +50,27 @@ export function TipPresetButton({
   const label = percentage === 0 ? 'Sin propina' : `${percentage}%`;
 
   return (
-    <Button
+    <CustomButton
       type="button"
-      variant={isSelected ? 'default' : 'outline'}
+      // Force default variant to apply premium styles always
+      variant="default"
+      // Color logic:
+      // Selected: undefined (uses default brand primary)
+      // Unselected: zinc-100 (#f4f4f5) for light mode, zinc-800 (#27272a) for dark mode.
+      // Since we can't easily detect mode here for the string prop without hooks, 
+      // let's use a CSS variable for background if possible, or a neutral hex that works okay.
+      // Better: Use 'var(--muted)' which adapts to theme.
+      color={isSelected ? undefined : 'var(--muted)'}
+      textColor={isSelected ? undefined : 'var(--muted-foreground)'}
       size="lg"
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'h-12 font-medium',
-        isSelected && 'bg-primary text-primary-foreground'
+        'h-12 font-medium flex-1 min-w-[80px] max-w-[120px]',
+        // We don't need manual bg classes anymore as CustomButton handles it via style prop
       )}
     >
       {label}
-    </Button>
+    </CustomButton>
   );
 }

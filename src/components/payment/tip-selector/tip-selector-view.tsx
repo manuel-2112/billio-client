@@ -11,6 +11,7 @@ import { Card } from '@/registry/new-york-v4/ui/card';
 import { Label } from '@/registry/new-york-v4/ui/label';
 import { TIP_PRESETS } from '@/lib/constants/payment';
 import { formatCLP } from '@/lib/utils/currency';
+import Counter from '@/components/ui/counter';
 
 interface TipSelectorViewProps {
   /**
@@ -82,7 +83,7 @@ export function TipSelectorView({
       </div>
 
       {/* Preset buttons */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="flex flex-wrap gap-2">
         {TIP_PRESETS.map((percentage) => (
           <TipPresetButton
             key={percentage}
@@ -103,12 +104,33 @@ export function TipSelectorView({
       />
 
       {/* Current tip display */}
-      {currentTip > 0 && (
-        <Card className="bg-muted/50 p-3 text-center">
-          <p className="text-sm text-muted-foreground">Propina seleccionada</p>
-          <p className="text-xl font-semibold">{formatCLP(currentTip)}</p>
-        </Card>
-      )}
+      {/* Current tip display - Always visible */}
+      <Card className="bg-muted/50 p-6 flex flex-col items-center justify-center gap-2 overflow-hidden relative min-h-[160px]">
+        <p className="text-sm text-muted-foreground z-10 relative">Propina seleccionada</p>
+        <div className="flex items-center justify-center z-10 relative">
+          <span className="text-4xl font-bold text-[var(--foreground)] mr-2">$</span>
+          <Counter
+            value={currentTip}
+            fontSize={48}
+            padding={0}
+            gap={2}
+            textColor="var(--foreground)" // Adapt to theme
+            fontWeight={700}
+            // Dynamic places based on digits, e.g. 1500 -> [1000, 100, 10, 1]
+            // We let the component auto-detect by passing 'places' based on value string length if needed,
+            // but the component default logic handles exact digits of 'value'.
+            // However, to ensure smooth animation when number of digits changes (e.g. 900 -> 1000), 
+            // we might want fixed places like [10000, 1000, 100, 10, 1] but that would show leading zeros if not handled.
+            // The provided component's default 'places' prop logic:
+            // places = [...value.toString()].map(...)
+            // This means it recalculates places on every render based on current value string.
+            // This is fine for the requested effect found in the library usually.
+            gradientFrom="var(--background)" 
+            gradientTo="transparent"
+            gradientHeight={32}
+          />
+        </div>
+      </Card>
     </div>
   );
 }

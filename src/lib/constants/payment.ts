@@ -18,7 +18,7 @@ export const IVA_PERCENTAGE = 19;
 /**
  * Tip preset percentages
  */
-export const TIP_PRESETS = [0, 10, 15, 20] as const;
+export const TIP_PRESETS = [0, 10, 15] as const;
 
 /**
  * Payment methods

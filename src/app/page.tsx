@@ -122,6 +122,19 @@ export default function HomePage() {
           </Card>
         </div>
 
+        {/* Hero Scroll Demo */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="mb-4 text-2xl font-semibold">Diseño Hero Scroll</h2>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Vista previa del diseño del primer paso con animación de scroll.
+            </p>
+            <Button asChild variant="outline" className="w-full md:w-auto">
+              <Link href="/demo/hero-scroll">Ver Diseño Hero Scroll</Link>
+            </Button>
+          </div>
+        </div>
+
         {/* Demo Routes */}
         <div className="space-y-4">
           <div>

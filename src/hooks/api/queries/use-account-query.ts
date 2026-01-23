@@ -8,7 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { accountRepository } from '@/lib/api/repositories/account-repository';
 import { accountQueryKeys } from './use-account-query-key';
-import type { Account } from '@/types/payment';
+import type { PublicAccountResponse } from '@/types/api-response';
 
 interface UseAccountQueryParams {
   restaurant: string;
@@ -22,15 +22,6 @@ interface UseAccountQueryParams {
  * 
  * @param params - Query parameters
  * @returns TanStack Query result with account data
- * 
- * @example
- * ```tsx
- * const { data: account, isLoading, error } = useAccountQuery({
- *   restaurant: 'demo',
- *   location: 'principal',
- *   table: 1,
- * });
- * ```
  */
 export function useAccountQuery({
   restaurant,
@@ -38,7 +29,7 @@ export function useAccountQuery({
   table,
   enabled = true,
 }: UseAccountQueryParams) {
-  return useQuery<Account>({
+  return useQuery<PublicAccountResponse>({
     queryKey: accountQueryKeys.detail(restaurant, location, table),
     queryFn: () =>
       accountRepository.getAccount({ restaurant, location, table }),

@@ -62,7 +62,7 @@ export function CheckoutContainer({
   onBack,
 }: CheckoutContainerProps) {
   const router = useRouter();
-  const { data: account } = useAccountQuery({
+  const { data } = useAccountQuery({
     restaurant,
     location,
     table,
@@ -74,7 +74,8 @@ export function CheckoutContainer({
   const [error, setError] = useState<string | null>(null);
 
   const handleCheckout = () => {
-    if (!account) return;
+    if (!data?.account) return;
+    const { account } = data;
 
     // Validate minimum payment
     if (!isValidPaymentAmount(account.total)) {
@@ -126,9 +127,11 @@ export function CheckoutContainer({
     }
   };
 
-  if (!account) {
+  if (!data?.account) {
     return null;
   }
+
+  const { account } = data;
 
   return (
     <CheckoutView

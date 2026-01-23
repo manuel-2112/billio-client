@@ -6,7 +6,7 @@ import localFont from 'next/font/local';
 import { ThemeProvider } from 'next-themes';
 
 import '@/app/globals.css';
-import { Toaster } from '@/registry/new-york-v4/ui/sonner';
+import { Toaster } from '@/components/design-system/feedback/toast';
 import { QueryProvider } from '@/lib/providers/query-provider';
 
 const geistSans = localFont({

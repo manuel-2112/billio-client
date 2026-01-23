@@ -5,7 +5,8 @@
  * Follows Single Responsibility Principle: only renders checkout UI.
  */
 
-import { Button } from '@/registry/new-york-v4/ui/button';
+import { CustomButton } from '@/components/design-system/ui/custom-button';
+import { ApplePayButton } from '@/components/ApplePayButton';
 import { PaymentTotalCard } from './payment-total-card';
 import { CheckoutErrorState } from './checkout-error-state';
 import { KlapElementsWrapper } from './klap-elements-wrapper';
@@ -90,12 +91,6 @@ export function CheckoutView({
 
   return (
     <div className="space-y-6">
-      {onBack && (
-        <Button variant="ghost" onClick={onBack} className="mb-2">
-          ← Volver
-        </Button>
-      )}
-
       {/* Payment Total */}
       <PaymentTotalCard total={total} tip={tip} isProcessing={isLoading} />
 
@@ -118,26 +113,31 @@ export function CheckoutView({
             onError={onPaymentError}
           />
           {onCancel && (
-            <Button
+            <CustomButton
               variant="outline"
               className="w-full"
               onClick={onCancel}
               disabled={isLoading}
             >
               Cancelar pago
-            </Button>
+            </CustomButton>
           )}
         </div>
       ) : (
         <div className="space-y-3">
-          <Button
-            onClick={onCheckout}
-            disabled={isLoading || !canPay}
-            className="h-14 w-full text-base font-semibold"
-            size="lg"
-          >
-            {isLoading ? 'Inicializando...' : 'Pagar ahora'}
-          </Button>
+          {typeof window !== 'undefined' && window.ApplePaySession ? (
+            <ApplePayButton />
+          ) : (
+            <CustomButton
+              onClick={onCheckout}
+              isLoading={isLoading}
+              disabled={isLoading || !canPay}
+              className="h-14 w-full text-base font-semibold"
+              size="lg"
+            >
+              {isLoading ? 'Inicializando...' : 'Pagar ahora'}
+            </CustomButton>
+          )}
           {!canPay && (
             <p className="text-center text-xs text-muted-foreground">
               El monto mínimo de pago es ${MIN_PAYMENT_AMOUNT.toLocaleString('es-CL')} CLP
