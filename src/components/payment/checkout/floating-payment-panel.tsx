@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, hasApplePay } from "@/lib/utils";
 import { CustomButton } from "@/components/design-system/ui/custom-button";
+import { ApplePayButton } from "@/components/ApplePayButton";
 
 interface FloatingPaymentPanelProps {
   /** Number of selected items */
@@ -17,6 +18,8 @@ interface FloatingPaymentPanelProps {
   onPayNow?: () => void;
   /** Label for the action button */
   label?: string;
+  /** Whether to show Apple Pay button if available */
+  showApplePay?: boolean;
 }
 
 /**
@@ -32,6 +35,7 @@ export function FloatingPaymentPanel({
   total,
   onPayNow,
   label = "Pay Now",
+  showApplePay = false,
 }: FloatingPaymentPanelProps) {
   const isVisible = selectedCount > 0;
 
@@ -57,12 +61,19 @@ export function FloatingPaymentPanel({
                     {formatCurrency(total)}
                   </p>
                 </div>
-                <CustomButton
-                  onClick={onPayNow}
-                  className="px-8 py-3"
-                >
-                  {label}
-                </CustomButton>
+                {showApplePay && hasApplePay() ? (
+                  <ApplePayButton
+                    onClick={onPayNow}
+                    className="min-w-[140px] px-6 py-3"
+                  />
+                ) : (
+                  <CustomButton
+                    onClick={onPayNow}
+                    className="px-8 py-3"
+                  >
+                    {label}
+                  </CustomButton>
+                )}
               </div>
 
               {/* Details row: subtotal, tax */}

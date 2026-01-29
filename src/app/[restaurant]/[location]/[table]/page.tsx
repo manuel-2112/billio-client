@@ -11,11 +11,10 @@ import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader, MobileContainer } from '@/components/design-system/layout';
 import { TipSelectorContainer } from '@/components/payment/tip-selector/tip-selector-container';
-import { CheckoutContainer } from '@/components/payment/checkout/checkout-container';
 import { HeroBillContainer } from '@/components/payment/hero-bill/hero-bill-container';
 import { useAccountQuery } from '@/hooks/api/queries/use-account-query';
 
-type View = 'hero' | 'tip' | 'checkout';
+type View = 'hero' | 'tip';
 
 interface CustomerPageProps {
   params: Promise<{
@@ -122,8 +121,6 @@ export default function CustomerPage({ params, searchParams }: CustomerPageProps
         onBack={() => {
           if (currentView === 'tip') {
             handleViewChange('hero');
-          } else if (currentView === 'checkout') {
-            handleViewChange('tip');
           }
         }}
       />
@@ -136,20 +133,8 @@ export default function CustomerPage({ params, searchParams }: CustomerPageProps
             location={location}
             table={tableNumber}
             accountId={accountId}
-            onConfirm={() => handleViewChange('checkout')}
-            // If splitSubtotal is present, we use it to override the account subtotal
+            onConfirm={() => router.push(`/confirmacion/${accountId}`)}
             overrideSubtotal={splitSubtotal || undefined}
-          />
-        )}
-
-        {/* View 3: Checkout */}
-        {currentView === 'checkout' && accountId && (
-          <CheckoutContainer
-            restaurant={restaurant}
-            location={location}
-            table={tableNumber}
-            accountId={accountId}
-            onBack={() => handleViewChange('tip')}
           />
         )}
       </main>

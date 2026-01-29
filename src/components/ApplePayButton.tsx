@@ -2,8 +2,17 @@ import { buttonVariants } from "@/registry/new-york-v4/ui/button";
 import { cn, hasApplePay } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 
-export const ApplePayButton = () => {
+interface ApplePayButtonProps {
+  onClick?: () => void;
+  className?: string;
+}
+
+export const ApplePayButton = ({ onClick, className }: ApplePayButtonProps) => {
   const handleApplePayClick = () => {
+    if (onClick) {
+      onClick();
+      return;
+    }
     // TODO: Implementar lógica de pago real con Apple Pay API
     console.log("Apple Pay button clicked - demo mode");
     // Aquí irá la integración con tu backend de pagos
@@ -22,7 +31,8 @@ export const ApplePayButton = () => {
       onClick={handleApplePayClick}
       className={cn(
         buttonVariants({ variant: "default", size: "lg" }),
-        "w-full gap-1 text-xl"
+        "gap-1 text-xl",
+        className
       )}
     >
       <Icons.apple className="ml-2 h-5 w-5" />

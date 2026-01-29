@@ -217,6 +217,7 @@ export function TipSelectorContainer({
         // So subtotalToUse might be 'Selected Total'.
         onPayNow={onConfirm}
         label="Continuar"
+        showApplePay={true}
       />
     </div>
   );

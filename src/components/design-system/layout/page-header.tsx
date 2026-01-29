@@ -32,6 +32,10 @@ interface PageHeaderProps {
    */
   action?: ReactNode;
   /**
+   * Optional: Hide back button even if onBack or backHref is provided
+   */
+  hideBack?: boolean;
+  /**
    * Additional CSS classes
    */
   className?: string;
@@ -57,6 +61,7 @@ export function PageHeader({
   backHref,
   onBack,
   action,
+  hideBack,
   className,
 }: PageHeaderProps) {
   return (
@@ -68,7 +73,7 @@ export function PageHeader({
     >
       <div className="mx-auto flex max-w-lg items-center gap-4 px-4 py-4">
         {/* Back Button */}
-        {(onBack || backHref) && (
+        {(onBack || backHref) && !hideBack && (
           <div className="-ml-2">
             {onBack ? (
               <button
